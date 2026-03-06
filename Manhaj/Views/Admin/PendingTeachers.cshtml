@@ -1,0 +1,88 @@
+@model IEnumerable<Manhaj.Models.Teacher>
+@{
+    ViewData["Title"] = "طلبات المعلمين المعلقة";
+    Layout = "_DashboardLayout";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-header">
+            <h2 class="section-title">طلبات المعلمين المعلقة</h2>
+            <p class="section-subtitle">مراجعة طلبات انضمام المعلمين الجدد</p>
+        </div>
+
+        <div class="dashboard-card">
+            @if (Model.Any())
+            {
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--background-gray); font-weight: 600;">
+                                <th style="padding: 12px; text-align: right;">المعلم</th>
+                                <th style="padding: 12px; text-align: right;">البريد الإلكتروني</th>
+                                <th style="padding: 12px; text-align: right;">التخصص</th>
+                                <th style="padding: 12px; text-align: right;">رقم الهاتف</th>
+                                <th style="padding: 12px; text-align: center;">الهوية</th>
+                                <th style="padding: 12px; text-align: center;">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 12px;">@item.FirstName @item.LastName</td>
+                                    <td style="padding: 12px;">@item.Email</td>
+                                    <td style="padding: 12px;">@item.Specialization</td>
+                                    <td style="padding: 12px;">@item.Phone</td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <div style="display: flex; gap: 5px; justify-content: center;">
+                                            @if (!string.IsNullOrEmpty(item.NationalIdFrontPath))
+                                            {
+                                                <a href="~/@item.NationalIdFrontPath" target="_blank" class="btn btn-sm btn-outline" style="font-size: 12px; padding: 4px 8px;">
+                                                    🪪 الأمامية
+                                                </a>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.NationalIdBackPath))
+                                            {
+                                                <a href="~/@item.NationalIdBackPath" target="_blank" class="btn btn-sm btn-outline" style="font-size: 12px; padding: 4px 8px;">
+                                                    🪪 الخلفية
+                                                </a>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.TeacherFormalCardPath))
+                                            {
+                                                                        <a href="~/@item.TeacherFormalCardPath" target="_blank" class="btn btn-sm btn-outline" style="font-size: 12px; padding: 4px 8px;">
+                                                                🪪 الكارنية
+                                                            </a>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <div style="display: flex; gap: 10px; justify-content: center;">
+                                            <form asp-action="ApproveTeacher" asp-route-id="@item.Id" method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-primary" style="padding: 5px 15px; background: #28a745; border-color: #28a745;">
+                                                    ✓ قبول
+                                                </button>
+                                            </form>
+                                            <form asp-action="RejectTeacher" asp-route-id="@item.Id" method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-primary" style="padding: 5px 15px; background: #dc3545; border-color: #dc3545;" onclick="return confirm('هل أنت متأكد من رفض هذا الطلب؟ سيتم حذف الحساب نهائياً.');">
+                                                    ✕ رفض
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">لا توجد طلبات معلمين معلقة حالياً</p>
+                    <a asp-action="Dashboard" class="btn btn-secondary">العودة للرئيسية</a>
+                </div>
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,32 @@
+@model Manhaj.Models.Student_Quiz
+
+@{
+    ViewData["Title"] = "نتيجة الاختبار";
+    Layout = "_DashboardLayout";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px; display: flex; align-items: center; justify-content: center;">
+    <div class="dashboard-card" style="max-width: 500px; width: 100%; text-align: center; padding: 40px;">
+        <div style="font-size: 60px; margin-bottom: 20px;">🎉</div>
+        <h2 style="font-size: 24px; margin-bottom: 10px;">تم تسليم الاختبار بنجاح!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 30px;">شكراً لك على إتمام الاختبار.</p>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+            <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 5px;">درجتك</p>
+            <h3 style="font-size: 36px; color: var(--primary-color); margin: 0;">
+                @Model.Grade.ToString("0.##") / @Model.Quiz.TotalGrade.ToString("0.##")
+            </h3>
+        </div>
+
+        @if (Model.Quiz?.Deadline != null && DateTime.Now > Model.Quiz.Deadline)
+        {
+            <a asp-controller="Quiz" asp-action="ViewAnswers" asp-route-id="@Model.QuizId" class="btn btn-secondary" style="width: 100%; margin-bottom: 15px;">
+                عرض الإجابات
+            </a>
+        }
+
+        <a asp-controller="Student" asp-action="Course" asp-route-id="@Model.Quiz?.Lecture?.CourseId" class="btn btn-primary" style="width: 100%;">
+            عودة للدورة
+        </a>
+    </div>
+</section>

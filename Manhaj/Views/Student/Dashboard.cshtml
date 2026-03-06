@@ -1,0 +1,128 @@
+@model Manhaj.Models.Student
+@{
+    ViewData["Title"] = "لوحة تحكم الطالب";
+    Layout = "_DashboardLayout";
+}
+
+<div class="content-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 class="heading-md" style="color: var(--primary-blue);">لوحة التحكم</h2>
+            <p class="body-md" style="color: var(--text-secondary);">متابعة تقدمك التعليمي</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-body">
+    <!-- Stats Cards -->
+    <div class="stats-grid" style="margin-bottom: 40px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div class="stat-card" style="background: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-card-icon" style="background: #e0e7ff; color: #4f46e5; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📚</div>
+                    <div class="stat-card-value">@ViewBag.TotalEnrolledCourses</div>
+                    <div class="stat-card-label">الدورات المسجلة</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card" style="background: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-card-icon" style="background: #fce7f3; color: #db2777; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🎓</div>
+                    <div class="stat-card-value">@ViewBag.CompletedCourses</div>
+                    <div class="stat-card-label">الدورات المكتملة</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="background: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-card-icon" style="background: #dcfce7; color: #16a34a; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🎥</div>
+                    <div class="stat-card-value">@ViewBag.CompletedLectures</div>
+                    <div class="stat-card-label">المحاضرات المكتملة</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="background: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-card-icon" style="background: #e0e7ff; color: #4f46e5; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📝</div>
+                    <div class="stat-card-value">@ViewBag.CompletedQuizzes / @ViewBag.TotalQuizzes</div>
+                    <div class="stat-card-label">الاختبارات (مكتمل / كلي)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="background: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-card-icon" style="background: #fff7ed; color: #ea580c; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📋</div>
+                    <div class="stat-card-value">@ViewBag.CompletedAssignments / @ViewBag.TotalAssignments</div>
+                    <div class="stat-card-label">الواجبات (مكتمل / كلي)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <span style="font-size: 24px;">📊</span>
+            <span>آخر النشاطات</span>
+        </div>
+        
+        @if (ViewBag.Activities != null && ((List<Manhaj.ViewModels.ActivityVM>)ViewBag.Activities).Any())
+        {
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>النشاط</th>
+                            <th>الدورة</th>
+                            <th>التاريخ/الموعد</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var activity in (List<Manhaj.ViewModels.ActivityVM>)ViewBag.Activities)
+                        {
+                            <tr>
+                                <td>
+                                    @if (activity.Type == "Lecture")
+                                    {
+                                        <span style="color: #17a2b8;">📹 محاضرة جديدة:</span> @activity.Title
+                                    }
+                                    else if (activity.Type == "Quiz")
+                                    {
+                                        <span style="color: var(--secondary-color);">🧠 اختبار:</span> @activity.Title
+                                    }
+                                    else if (activity.Type == "Assignment")
+                                    {
+                                        <span style="color: var(--primary-color);">📝 واجب:</span> @activity.Title
+                                    }
+                                </td>
+                                <td>@activity.CourseTitle</td>
+                                <td style="color: @(activity.Type == "Lecture" ? "inherit" : "#dc3545");">
+                                    @activity.Date.ToString("yyyy-MM-dd HH:mm")
+                                </td>
+                                <td>
+                                    <a href="@activity.Link" class="btn btn-sm btn-outline-primary" @(activity.Type == "Lecture" ? "target='_blank'" : "")>@activity.LinkText</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🎉</div>
+                <p>لا توجد مهام قادمة! استمتع بوقتك</p>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,198 @@
+@model Manhaj.Models.Quiz
+
+@{
+    ViewData["Title"] = "تفاصيل الاختبار";
+    Layout = "_DashboardLayout";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="section-header">
+            <h2 class="section-title">@Model.Title</h2>
+            <div style="display: flex; gap: 20px; margin-bottom: 20px; color: var(--text-secondary);">
+                <span>عدد الأسئلة: @Model.NumberOfQuestions</span>
+                <span>•</span>
+                <span>الدرجة الكلية: @Model.TotalGrade</span>
+                <span>•</span>
+                <span>المدة: @Model.Duration دقيقة</span>
+            </div>
+            <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                <div><span style="font-weight: 600;">بداية الدخول:</span> متاح من @Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</div>
+                @if (Model.Deadline.HasValue)
+                {
+                    <div><span style="font-weight: 600;">آخر موعد للدخول:</span> @Model.Deadline.Value.ToString("yyyy-MM-dd hh:mm tt")</div>
+                }
+                <div style="font-size: 13px; color: var(--primary-color); margin-top: 5px;">
+                    ℹ️ يمكنك بدء الاختبار في أي وقت خلال هذه الفترة. بمجرد البدء، سيكون لديك @Model.Duration دقيقة للإجابة.
+                </div>
+            </div>
+        </div>
+
+        @if (User.IsInRole("Student"))
+        {
+            <div class="dashboard-card" style="text-align: center; padding: 40px;">
+                <h3 style="margin-bottom: 20px;">تعليمات الاختبار</h3>
+                <ul style="text-align: right; margin-bottom: 30px; display: inline-block;">
+                    <li>مدة الاختبار: @Model.Duration دقيقة</li>
+                    <li>عدد الأسئلة: @Model.NumberOfQuestions</li>
+                    <li>بمجرد البدء، سيبدأ العداد التنازلي ولا يمكن إيقافه</li>
+                    <li>سيتم تسليم الإجابات تلقائياً عند انتهاء الوقت</li>
+                </ul>
+                
+                @if (DateTime.Now < Model.StartTime)
+                {
+                    <div style="background: #fff3cd; color: #856404; padding: 20px; border-radius: 8px; border: 1px solid #ffeeba; margin-top: 20px;">
+                        <h4 style="margin-bottom: 10px;">⏳ لم يبدأ الاختبار بعد</h4>
+                        <p>سيبدأ الاختبار في: <strong>@Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</strong></p>
+                        <p style="font-size: 14px;">يرجى العودة في الموعد المحدد لبدء الاختبار.</p>
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="Start" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary" style="padding: 15px 50px; font-size: 20px;" onclick="return confirm('هل أنت متأكد من بدء الاختبار؟ سيبدأ العداد فوراً.');">
+                            ابدأ الاختبار الآن
+                        </button>
+                    </form>
+                }
+            </div>
+            <div style="text-align: center;">
+                <a asp-controller="Student" asp-action="Course" asp-route-id="@Model.Lecture?.CourseId" class="btn btn-outline">عودة للدورة</a>
+            </div>
+        }
+        else
+        {
+            <div class="dashboard-card" style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="font-size: 20px; font-weight: 600;">الأسئلة (@Model.Questions.Count)</h3>
+                    @if (DateTime.Now < Model.StartTime)
+                    {
+                        <a asp-action="AddQuestion" asp-route-quizId="@Model.Id" class="btn btn-primary">
+                            + إضافة سؤال
+                        </a>
+                    }
+                    else
+                    {
+                        <span style="color: var(--text-secondary); font-size: 14px;">
+                            ⏱️ لا يمكن إضافة أسئلة بعد بدء الاختبار
+                        </span>
+                    }
+                </div>
+
+                @if (Model.Questions.Any())
+                {
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        @foreach (var question in Model.Questions)
+                        {
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <p style="font-weight: 600; margin: 0;">@question.Content</p>
+                                    <span style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">@question.Points درجات</span>
+                                </div>
+                                <ul style="list-style: none; padding: 0;">
+                                    @foreach (var option in question.Options)
+                                    {
+                                        <li style="padding: 8px 12px; margin-bottom: 5px; background: white; border-radius: 4px; border: 1px solid @(option.Content == question.TrueAnswer ? "#28a745" : "#ddd"); color: @(option.Content == question.TrueAnswer ? "#28a745" : "inherit");">
+                                            @option.Content @(option.Content == question.TrueAnswer ? "✅" : "")
+                                        </li>
+                                    }
+                                </ul>
+                                    <div style="display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                        <a asp-action="EditQuestion" asp-route-id="@question.Id" class="btn btn-outline" style="padding: 6px 12px; font-size: 14px;">
+                                            ✏️ تعديل
+                                        </a>
+                                        <form asp-action="DeleteQuestion" method="post" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا السؤال؟')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="questionId" value="@question.Id" />
+                                            <input type="hidden" name="quizId" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-outline" style="padding: 6px 12px; font-size: 14px; background: #fff; color: #dc3545; border-color: #dc3545;">
+                                                🗑️ حذف
+                                            </button>
+                                        </form>
+                                    </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p style="text-align: center; color: var(--text-secondary); padding: 20px;">لم يتم إضافة أسئلة بعد</p>
+                }
+            </div>
+            
+            <div class="dashboard-card" style="margin-bottom: 30px;">
+                <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 20px;">حالة الطلاب</h3>
+                
+                @if (ViewBag.StudentStatuses != null)
+                {
+                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                <th style="padding: 12px; text-align: right;">اسم الطالب</th>
+                                <th style="padding: 12px; text-align: center;">الحالة</th>
+                                <th style="padding: 12px; text-align: center;">الدرجة</th>
+                                <th style="padding: 12px; text-align: center;">تاريخ التقديم</th>
+                                <th style="padding: 12px; text-align: center;">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var status in ViewBag.StudentStatuses)
+                            {
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 12px;">@status.Student.FirstName @status.Student.LastName</td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        @if (status.IsSubmitted)
+                                        {
+                                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px;">تم التسليم</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px;">لم يتم التسليم</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        @if (status.IsSubmitted)
+                                        {
+                                            <span style="font-weight: bold; color: @(status.Grade >= Model.TotalGrade / 2 ? "#28a745" : "#dc3545");">
+                                                @status.Grade / @Model.TotalGrade
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 12px; text-align: center; color: var(--text-secondary);">
+                                        @(status.IsSubmitted ? status.SubmissionDate.ToString("yyyy/MM/dd HH:mm") : "-")
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        @if (status.IsSubmitted)
+                                        {
+                                            <a asp-action="ViewStudentAnswers" asp-route-id="@Model.Id" asp-route-studentId="@status.Student.Id" class="btn btn-outline" style="padding: 5px 10px; font-size: 12px;">
+                                                عرض الإجابات
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: var(--text-secondary);">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="text-align: center; color: var(--text-secondary); padding: 20px;">لا يوجد طلاب مسجلين في هذه الدورة</p>
+                }
+            </div>
+            <div style="text-align: center;">
+                <a asp-controller="Teacher" asp-action="Course" asp-route-id="@Model.Lecture?.CourseId" class="btn btn-outline">عودة للدورة</a>
+            </div>
+        }
+
+        
+    </div>
+</section>

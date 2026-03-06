@@ -1,0 +1,110 @@
+@model Manhaj.Models.Lecture
+@{
+    ViewData["Title"] = "تعديل المحاضرة";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="dashboard-card">
+            <h2 class="section-title" style="text-align: center; margin-bottom: 30px;">تعديل المحاضرة</h2>
+            
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                <input type="hidden" name="CourseId" value="@Model.CourseId" />
+                
+                <div class="form-group">
+                    <label class="form-label">عنوان المحاضرة</label>
+                    <input type="text" name="Title" class="form-input" value="@Model.Title" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">وصف المحاضرة</label>
+                    <textarea name="Description" class="form-textarea" rows="4" required>@Model.Description</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">رابط الفيديو</label>
+                    <input type="url" name="VideoUrl" class="form-input" value="@Model.VideoUrl" dir="ltr" style="text-align: left;" required />
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; font-size: 18px;">
+                        حفظ التعديلات
+                    </button>
+                    <a asp-controller="Teacher" asp-action="Course" asp-route-id="@Model.CourseId" 
+                       class="btn btn-outline" style="flex: 1; border: 2px solid var(--text-secondary); color: var(--text-secondary); text-align: center; line-height: 45px; text-decoration: none;">
+                        إلغاء
+                    </a>
+                </div>
+            </form>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;" />
+
+            <h3 style="margin-bottom: 20px;">المواد التعليمية</h3>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin-bottom: 15px; font-size: 16px;">إضافة ملف جديد</h4>
+                <form asp-action="AddMaterial" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="lectureId" value="@Model.Id" />
+                    
+                    <div class="form-group">
+                        <label class="form-label">عنوان الملف</label>
+                        <input type="text" name="title" class="form-input" placeholder="مثال: ملخص المحاضرة PDF" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">اختيار الملف</label>
+                        <input type="file" name="file" class="form-control" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary" style="margin-top: 10px;">
+                        📤 رفع الملف
+                    </button>
+                </form>
+            </div>
+
+            @if (Model.Materials != null && Model.Materials.Any())
+            {
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @foreach (var material in Model.Materials)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border: 1px solid #eee; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">📄</span>
+                                <div>
+                                    <div style="font-weight: 600;">@material.Title</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">@material.Filetype</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="~/@material.FilePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    تحميل
+                                </a>
+                                <form asp-action="DeleteMaterial" asp-route-id="@material.Id" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الملف؟');" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        حذف
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="text-align: center; color: var(--text-secondary);">لا توجد مواد تعليمية مرفقة</p>
+            }
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;" />
+
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذه المحاضرة؟');">
+                <button type="submit" class="btn" style="width: 100%; background: #dc3545; color: white;">
+                    🗑️ حذف المحاضرة
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

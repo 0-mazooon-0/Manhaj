@@ -1,0 +1,85 @@
+@model IEnumerable<Manhaj.Models.Course_Registration>
+@{
+    ViewData["Title"] = "طلبات التسجيل المعلقة";
+    Layout = "_DashboardLayout";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-header">
+            <h2 class="section-title">طلبات التسجيل المعلقة</h2>
+            <p class="section-subtitle">مراجعة إثباتات الدفع والموافقة على الطلاب</p>
+        </div>
+
+        <div class="dashboard-card">
+            @if (Model.Any())
+            {
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--background-gray); font-weight: 600;">
+                                <th style="padding: 12px; text-align: right;">الطالب</th>
+                                <th style="padding: 12px; text-align: right;">الدورة</th>
+                                <th style="padding: 12px; text-align: right;">السعر</th>
+                                <th style="padding: 12px; text-align: right;">تاريخ الطلب</th>
+                                <th style="padding: 12px; text-align: center;">إثبات الدفع</th>
+                                <th style="padding: 12px; text-align: center;">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 12px;">
+                                        <div style="font-weight: 600;">@item.Student.FirstName @item.Student.LastName</div>
+                                        <div style="font-size: 12px; color: var(--text-secondary);">@item.Student.Email</div>
+                                    </td>
+                                    <td style="padding: 12px;">@item.Course.Title</td>
+                                    <td style="padding: 12px;">@item.Course.Price.ToString("N0") جنيه</td>
+                                    <td style="padding: 12px;">@item.RegistrationDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        @if (!string.IsNullOrEmpty(item.PaymentProofPath))
+                                        {
+                                            <a href="@item.PaymentProofPath" target="_blank" class="btn btn-outline" style="padding: 5px 10px; font-size: 12px;">
+                                                👁️ عرض الصورة
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: var(--text-secondary);">لا يوجد</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <div style="display: flex; gap: 10px; justify-content: center;">
+                                            <form asp-action="ApproveEnrollment" method="post" style="display: inline;">
+                                                <input type="hidden" name="studentId" value="@item.StudentId" />
+                                                <input type="hidden" name="courseId" value="@item.CourseId" />
+                                                <button type="submit" class="btn btn-primary" style="padding: 5px 15px; background: #28a745; border-color: #28a745;">
+                                                    ✓ قبول
+                                                </button>
+                                            </form>
+                                            <form asp-action="RejectEnrollment" method="post" style="display: inline;">
+                                                <input type="hidden" name="studentId" value="@item.StudentId" />
+                                                <input type="hidden" name="courseId" value="@item.CourseId" />
+                                                <button type="submit" class="btn btn-primary" style="padding: 5px 15px; background: #dc3545; border-color: #dc3545;" onclick="return confirm('هل أنت متأكد من رفض هذا الطلب؟');">
+                                                    ✕ رفض
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">لا توجد طلبات تسجيل معلقة حالياً</p>
+                        <a asp-action="Dashboard" class="btn btn-secondary"  style="text-decoration:none;">العودة للرئيسية</a>
+                </div>
+            }
+        </div>
+    </div>
+</section>

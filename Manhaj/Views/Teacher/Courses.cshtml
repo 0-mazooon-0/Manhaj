@@ -1,0 +1,56 @@
+@model List<Manhaj.Models.Course>
+@{
+    ViewData["Title"] = "دوراتي";
+    Layout = "_DashboardLayout";
+}
+
+<section class="section" style="background: var(--background-gray); min-height: 80vh; padding: 40px 20px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-header">
+            <h2 class="section-title">إدارة الدورات</h2>
+            <p class="section-subtitle">عرض وإدارة الدورات التي قمت بإنشائها</p>
+        </div>
+
+
+
+        @if (Model.Any())
+        {
+            <div class="features-grid">
+                @foreach (var course in Model)
+                {
+                    <div class="feature-card" style="cursor: pointer;" onclick="window.location.href='@Url.Action("Course", "Teacher", new { id = course.Id })'">
+                        <div class="feature-icon">📚</div>
+                        <h3 class="feature-title">@course.Title</h3>
+                        <p class="feature-description">@course.Description</p>
+                        
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; color: var(--text-secondary); margin-bottom: 8px;">
+                                <span><strong>@course.Course_Registrations.Count</strong> طالب</span>
+                                <span><strong>@course.Lectures.Count</strong> محاضرة</span>
+                            </div>
+                            <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                                <strong>تاريخ الإنشاء:</strong> @course.CreationDate.ToShortDateString()
+                            </p>
+                            <p style="color: var(--primary-color); font-weight: 700; font-size: 18px; margin-top: 10px;">
+                                @course.Price.ToString("N0") جنيه
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <a class="btn btn-primary" style="width: 100%; display: block; text-align: center;" 
+                               asp-controller="Teacher" asp-action="Course" asp-route-id="@course.Id">
+                                إدارة الدورة
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 60px 20px;">
+                <p style="font-size: 18px; color: var(--text-secondary);">لم تقم بإنشاء أي دورة بعد</p>
+            </div>
+        }
+    </div>
+</section>
